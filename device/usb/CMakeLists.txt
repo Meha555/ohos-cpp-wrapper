@@ -1,0 +1,5 @@
+file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/.h")
+add_library(ddk_usb INTERFACE ${headers})
+target_link_libraries(ddk_usb INTERFACE DDK::base libusb_ndk.z.so common::event)
+target_include_directories(ddk_usb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(DDK::usb ALIAS ddk_usb)

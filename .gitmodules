@@ -1,0 +1,6 @@
+[submodule "napi-framework"]
+	path = napi-framework
+	url = https://github.com/Meha555/ohos-napi-framework.git
+[submodule "napi-aki"]
+	path = napi-aki
+	url = https://gitcode.com/m0_58699417/aki.git
