@@ -64,6 +64,8 @@ public:
         return instance;
     }
 
+    ~USBEventListener() { reset(); }
+
     USBEventListener &onAttach(NotifyCallback cb, void *userData = nullptr) {
         onAttach_ = {cb, userData};
         return *this;
