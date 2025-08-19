@@ -6,5 +6,6 @@ project(ohos-cpp-wrapper
 
 add_subdirectory(3rdparty)
 
+add_subdirectory(logging)
 add_subdirectory(commev)
 add_subdirectory(device)
