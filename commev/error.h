@@ -29,18 +29,20 @@ public:
             return "permission verification failed";
         case COMMONEVENT_ERR_INVALID_PARAMETER:
             return "invalid input parameter";
-        case COMMONEVENT_ERR_NOT_SYSTEM_SERVICE:
-            return "this app cannot send system common events";
         case COMMONEVENT_ERR_SENDING_REQUEST_FAILED:
             return "IPC request failed to send";
         case COMMONEVENT_ERR_INIT_UNDONE:
             return "Common event service not init";
-        case COMMONEVENT_ERR_OBTAIN_SYSTEM_PARAMS:
-            return "obtain system parameters failed";
         case COMMONEVENT_ERR_SUBSCRIBER_NUM_EXCEEDED:
             return "The subscriber number exceed system specification";
         case COMMONEVENT_ERR_ALLOC_MEMORY_FAILED:
             return "A memory allocation error occurs";
+#if OHOS_API_VERSION >= 18
+		case COMMONEVENT_ERR_NOT_SYSTEM_SERVICE:
+            return "this app cannot send system common events";
+        case COMMONEVENT_ERR_OBTAIN_SYSTEM_PARAMS:
+            return "obtain system parameters failed";
+#endif
         default:
             return "unknown error";
         }
