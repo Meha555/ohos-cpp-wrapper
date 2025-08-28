@@ -1,6 +1,13 @@
 #ifndef LOG_OH_LOG_STREAM_H_
 #define LOG_OH_LOG_STREAM_H_
 
+#ifndef LOG_DOMAIN
+# warning "LOG_DOMAIN is not defined, no log will be output"
+#endif
+#ifndef LOG_TAG
+# warning "LOG_TAG is not defined, no log will be output"
+#endif
+
 #include <ostream>
 #include <streambuf>
 #include <array>
@@ -39,10 +46,9 @@ protected:
         if (len > 0) {
             // 终止字符串
             buffer_[len] = '\0';
-            
-            // 使用OH_Log_Print输出内容
-            OH_LOG_Print(LOG_APP, level_, LOG_DOMAIN, LOG_TAG, "%{public}s", pbase());
-            
+
+            (void)OH_LOG_Print(LOG_APP, level_, LOG_DOMAIN, LOG_TAG, "%{public}s", pbase());
+
             // 重置缓冲区指针
             setp(buffer_.begin(), buffer_.end() - 1);
         } else {

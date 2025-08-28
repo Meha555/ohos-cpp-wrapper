@@ -4,8 +4,6 @@ project(ohos-cpp-wrapper
     LANGUAGES CXX C
 )
 
-add_subdirectory(3rdparty)
-
 add_subdirectory(logging)
 add_subdirectory(commev)
 add_subdirectory(device)
