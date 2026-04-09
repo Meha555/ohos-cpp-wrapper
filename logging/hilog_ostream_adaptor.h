@@ -16,9 +16,10 @@
 namespace OHOS {
 
 // 自定义流缓冲区，将数据通过OH_Log_Print输出
-template<size_t N, typename CharT = char>
+template <size_t N, typename CharT = char>
 class OHLogStreamBuf : public std::basic_streambuf<CharT> {
     using Base = std::basic_streambuf<CharT>;
+
 public:
     using char_type = typename Base::char_type;
     using traits_type = typename Base::traits_type;
@@ -28,44 +29,79 @@ public:
 
     // 构造函数，可指定日志标签和级别
     explicit OHLogStreamBuf(LogLevel level)
-        : level_(level) {
-        // 设置输出缓冲区
-        setp(buffer_.begin(), buffer_.end() - 1);  // 预留一个位置给终止符
+        : level_(level)
+    {
+        this->setp(buffer_.data(), buffer_.data() + N - 1);
+    }
+
+    virtual ~OHLogStreamBuf() override
+    {
+        sync();
+    }
+
+    void setLevel(LogLevel level)
+    {
+        level_ = level;
+    }
+
+    LogLevel level() const
+    {
+        return level_;
     }
 
 protected:
-    // 当缓冲区满或遇到特定字符时调用
-    int_type overflow(int_type c) override {
-        if (c != traits_type::eof()) {
-            *Base::pptr() = static_cast<char_type>(c);
-            Base::pbump(1);
+    int_type overflow(int_type c) override
+    {
+        if (traits_type::eq_int_type(c, traits_type::eof())) {
+            return traits_type::not_eof(c);
         }
-        // 刷新缓冲区
-        if (sync() == -1) {
+        // 刷新缓冲区的内容到输出后端
+        if (sync() == -1) { // 刷新失败
             return traits_type::eof();
         }
-        return c;
+
+        *this->pptr() = traits_type::to_char_type(c);
+        this->pbump(1);
+
+        // 特殊处理换行符
+        if (traits_type::eq_int_type(c, traits_type::to_int_type('\n'))) {
+            if (sync() == -1) { // 刷新失败
+                return traits_type::eof();
+            }
+        }
+
+        return traits_type::not_eof(c);
     }
 
-    // 同步缓冲区，将数据输出
-    int sync() override {
-        std::streamsize len = Base::pptr() - Base::pbase();
+    std::streamsize xsputn(const char_type* s, std::streamsize count) override
+    {
+        std::streamsize written = 0;
+        for (; written < count; ++written) {
+            if (traits_type::eq_int_type(this->sputc(s[written]), traits_type::eof())) {
+                // 写入失败
+                break;
+            }
+            // 特殊处理换行符
+            if (s[written] == '\n') {
+                sync();
+            }
+        }
+        return written;
+    }
+
+    int sync() override
+    {
+        std::streamsize len = this->pptr() - this->pbase();
         if (len > 0) {
-            // 终止字符串
-            (buffer_ + Base::pbase())[len] = '\0';
-
+            *this->pptr() = '\0';
             (void)OH_LOG_Print(LOG_APP, level_, LOG_DOMAIN, LOG_TAG, "%{public}s", Base::pbase());
-
-            // 重置缓冲区指针
-            setp(buffer_.begin(), buffer_.end() - 1);
-        } else {
-            return -1;
+            this->setp(buffer_.data(), buffer_.data() + N - 1);
         }
         return 0;
     }
 
 private:
-    std::array<char_type, N> buffer_;  // 缓冲区，可根据需要调整大小
+    std::array<char_type, N> buffer_; // 缓冲区，可根据需要调整大小
     LogLevel level_;
 };
 
